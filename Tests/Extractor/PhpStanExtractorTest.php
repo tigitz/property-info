@@ -370,7 +370,7 @@ class PhpStanExtractorTest extends TestCase
             ['b', [new Type(Type::BUILTIN_TYPE_ARRAY, false, null, true, [new Type(Type::BUILTIN_TYPE_INT)], [new Type(Type::BUILTIN_TYPE_STRING), new Type(Type::BUILTIN_TYPE_INT)])]],
             ['c', [new Type(Type::BUILTIN_TYPE_ARRAY, false, null, true, [], [new Type(Type::BUILTIN_TYPE_STRING), new Type(Type::BUILTIN_TYPE_INT)])]],
             ['d', [new Type(Type::BUILTIN_TYPE_ARRAY, false, null, true, [new Type(Type::BUILTIN_TYPE_STRING), new Type(Type::BUILTIN_TYPE_INT)], [new Type(Type::BUILTIN_TYPE_ARRAY, false, null, true, [], [new Type(Type::BUILTIN_TYPE_STRING)])])]],
-            ['e', [new Type(Type::BUILTIN_TYPE_OBJECT, true, Dummy::class, true, [new Type(Type::BUILTIN_TYPE_ARRAY, false, null, true, [], [new Type(Type::BUILTIN_TYPE_STRING)])], [new Type(Type::BUILTIN_TYPE_INT), new Type(Type::BUILTIN_TYPE_ARRAY, false, null, true, [new Type(Type::BUILTIN_TYPE_INT)], [new Type(Type::BUILTIN_TYPE_STRING, false, null, true, [], [new Type(Type::BUILTIN_TYPE_OBJECT, false, DefaultValue::class)])])]), new Type(Type::BUILTIN_TYPE_OBJECT, false, ParentDummy::class)]],
+            ['e', [new Type(Type::BUILTIN_TYPE_OBJECT, true, Dummy::class, false, [], []), new Type(Type::BUILTIN_TYPE_OBJECT, false, ParentDummy::class)]],
             ['f', null],
             ['g', [new Type(Type::BUILTIN_TYPE_ARRAY, false, null, true, [], [new Type(Type::BUILTIN_TYPE_STRING), new Type(Type::BUILTIN_TYPE_INT)])]],
         ];
@@ -406,6 +406,26 @@ class PhpStanExtractorTest extends TestCase
             ['numeric', [new Type(Type::BUILTIN_TYPE_INT), new Type(Type::BUILTIN_TYPE_FLOAT), new Type(Type::BUILTIN_TYPE_STRING)]],
             ['arrayKey', [new Type(Type::BUILTIN_TYPE_STRING), new Type(Type::BUILTIN_TYPE_INT)]],
             ['double', [new Type(Type::BUILTIN_TYPE_FLOAT)]],
+        ];
+    }
+
+    /**
+     * @dataProvider genericType
+     * @group test
+     */
+    public function testGenericTypes($property, bool $isNullableProperty, array $type)
+    {
+        $this->assertEquals([new Type(Type::BUILTIN_TYPE_OBJECT, $isNullableProperty, 'Symfony\Component\PropertyInfo\Tests\Fixtures\TypeVariableDummy')], $this->extractor->getTypes('Symfony\Component\PropertyInfo\Tests\Fixtures\GenericDummy', $property));
+        $this->assertEquals($type, $this->extractor->getTypes('Symfony\Component\PropertyInfo\Tests\Fixtures\TypeVariableDummy', 'typeVariableProperty', ['outerClassProperty' => 'Symfony\Component\PropertyInfo\Tests\Fixtures\GenericDummy::'.$property]));
+    }
+
+    public function genericType(): array
+    {
+        return [
+            ['stringType', false, [new Type(Type::BUILTIN_TYPE_STRING)]],
+            ['dateTimeType', false, [new Type(Type::BUILTIN_TYPE_OBJECT, false, \DateTime::class)]],
+            ['nullableDateTimeType', true, [new Type(Type::BUILTIN_TYPE_OBJECT, false, \DateTime::class)]],
+//            ['arrayOfStringWithKeyAsStringType', [new Type(Type::BUILTIN_TYPE_STRING, false, null)]],
         ];
     }
 
